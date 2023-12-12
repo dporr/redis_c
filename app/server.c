@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <errno.h>
 #include <netinet/in.h>
@@ -22,8 +23,7 @@ int main() {
 	//Can we do srv_addr.sin_addr.s_addr =  htonl(INADDR_ANY); directly?
 	srv_addr.sin_addr 	  =  target_address;
 
-	if( bind(socket_fd, &srv_addr, sizeof(srv_addr)) < 0 ) sys_err(errno); 
-
+	bind(socket_fd, (struct sockaddr *) &srv_addr, sizeof(srv_addr)); 
 	listen(socket_fd, 50);
 	accept(socket_fd,0,0);
 	// Uncomment this block to pass the first stage
@@ -67,7 +67,7 @@ int main() {
 	// accept(server_fd, (struct sockaddr *) &client_addr, &client_addr_len);
 	// printf("Client connected\n");
 	//
-	close(socket_fd);
+	//close(socket_fd);
 
 	return 0;
 }
