@@ -1,5 +1,6 @@
+#include <stdio.h>
 #include <sys/socket.h>
-#include <sys/errno.h>
+#include <errno.h>
 #include <netinet/in.h>
 
 int main() {
