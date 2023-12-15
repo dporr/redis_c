@@ -54,10 +54,14 @@ int main() {
 	uint32_t REQUEST_SIZE = 4096;
 	char* request[REQUEST_SIZE];
 	memset(&request, 0, REQUEST_SIZE * sizeof(char));
-	if(client_fd) recv(client_fd, &request, REQUEST_SIZE, 0 );
-	printf("%s", &request); //FIX: This generates a warning
-	char* response = "+PONG\r\n";
-	send(client_fd, response,strlen(response),0);
+	int calls = 0 ;
+	if(client_fd < 0) printf("Client connection failed: %s...\n", strerror(errno));
+	while(recv(client_fd, &request, REQUEST_SIZE, 0 )) {
+		printf("Call %d - %s", calls,&request); //FIX: This generates a warning
+		char* response = "+PONG\r\n";
+		calls++;
+		send(client_fd, response,strlen(response),0);
+	}
 	// Uncomment this block to pass the first stage
 	//
 	// int server_fd, client_addr_len;
