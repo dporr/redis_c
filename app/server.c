@@ -57,7 +57,7 @@ int main() {
 	if(client_fd) recv(client_fd, &request, REQUEST_SIZE, 0 );
 	printf("%s", &request); //FIX: This generates a warning
 	char* response = "+PONG\r\n";
-	send(client_fd, response,sizeof(response),0);
+	send(client_fd, response,sizeof(response)-1,0);
 	// Uncomment this block to pass the first stage
 	//
 	// int server_fd, client_addr_len;
