@@ -23,21 +23,23 @@ ie.
 
 // void handle_PING(char* arguments,char* reply){
 // }
-void handle_client(int client_socket){
+void handle_client(void* client_socket){
+	int client_fd = (int)(client_socket);
 	uint32_t REQUEST_SIZE = 4096;
 	char* request[REQUEST_SIZE];
 	memset(&request, 0, REQUEST_SIZE * sizeof(char));
 	int calls = 0 ;
-	if(client_socket < 0 ){
+	if(client_fd < 0 ){
 		printf("Client connection failed: %s...\n", strerror(errno));
 		exit(-1);
 	}
 	
-	while(recv(client_socket, &request, REQUEST_SIZE, 0 )) {
+	while(recv(client_fd, &request, REQUEST_SIZE, 0 )) {
 		printf("Call %d - %s", calls,&request); //FIX: This generates a warning
 		char* response = "+PONG\r\n";
 		calls++;
-		send(client_socket, response,strlen(response),0);
+		send(client_fd, response,strlen(response),0);
+		memset(&request, 0, REQUEST_SIZE * sizeof(char));
 	}
 }
 
