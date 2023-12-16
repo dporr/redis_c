@@ -3,7 +3,9 @@
 #include <sys/socket.h>
 #include <errno.h>
 #include <netinet/in.h>
-#include <regex.h>     
+#include <regex.h>    
+#include <pthread.h> 
+#include <stdlib.h>
 
 /* Parses a line in the form *N\r\n$M\r\nABC...M\r\nEOF
 returns an array of N elements containing the command and its arguments
@@ -21,6 +23,23 @@ ie.
 
 // void handle_PING(char* arguments,char* reply){
 // }
+void handle_client(int client_socket){
+	uint32_t REQUEST_SIZE = 4096;
+	char* request[REQUEST_SIZE];
+	memset(&request, 0, REQUEST_SIZE * sizeof(char));
+	int calls = 0 ;
+	if(client_socket < 0 ){
+		printf("Client connection failed: %s...\n", strerror(errno));
+		exit(-1);
+	}
+	
+	while(recv(client_socket, &request, REQUEST_SIZE, 0 )) {
+		printf("Call %d - %s", calls,&request); //FIX: This generates a warning
+		char* response = "+PONG\r\n";
+		calls++;
+		send(client_socket, response,strlen(response),0);
+	}
+}
 
 int main() {
 	// Disable output buffering
@@ -50,17 +69,12 @@ int main() {
 
 	bind(socket_fd, (struct sockaddr *) &srv_addr, sizeof(srv_addr)); 
 	listen(socket_fd, 50);
-	uint32_t client_fd = accept(socket_fd,0,0);
-	uint32_t REQUEST_SIZE = 4096;
-	char* request[REQUEST_SIZE];
-	memset(&request, 0, REQUEST_SIZE * sizeof(char));
-	int calls = 0 ;
-	if(client_fd < 0) printf("Client connection failed: %s...\n", strerror(errno));
-	while(recv(client_fd, &request, REQUEST_SIZE, 0 )) {
-		printf("Call %d - %s", calls,&request); //FIX: This generates a warning
-		char* response = "+PONG\r\n";
-		calls++;
-		send(client_fd, response,strlen(response),0);
+	uint32_t client_fd;
+	while(( client_fd = accept(socket_fd,0,0)) != -1){
+		//Create a thread with handle_client()
+		pthread_t thread_id;
+		memset(&thread_id, 0, sizeof(pthread_t));
+		pthread_create(&thread_id, NULL, (void *)(&handle_client), (void *) client_fd); //FIX: How to pass args to a thread
 	}
 	// Uncomment this block to pass the first stage
 	//
